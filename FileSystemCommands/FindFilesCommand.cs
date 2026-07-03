@@ -2,6 +2,8 @@ using CommandLib;
 
 namespace FileSystemCommands
 {
+    [DisplayName("Поиск файлов по маске")]
+    [Version(1, 0)]
     public class FindFilesCommand: ICommand
     {
         private readonly string _DirectoryPath;

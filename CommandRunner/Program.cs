@@ -1,40 +1,54 @@
 ﻿using System.Reflection;
-using ICommand = CommandLib.ICommand;
+using CommandLib;
 
-string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FileSystemCommands.dll");
-Assembly assembly = Assembly.LoadFrom(dllPath);
-
-var CommandTypes = assembly.GetTypes()
-.Where(type => type.GetInterfaces().Contains(typeof(ICommand)));
-
-foreach (var type in CommandTypes)
+if (args.Length == 0)
 {
-    Console.WriteLine($"Найдена команда: {type.Name}");
-    var constructor = type.GetConstructors()[0];
-    var parametrs = constructor.GetParameters();
-    var arguments = new  object[parametrs.Length];
-    for(int i = 0; i < parametrs.Length; i++)
+    Console.WriteLine("Укажите путь к DLL");
+    return;
+}
+Assembly assembly = Assembly.LoadFrom(args[0]);
+foreach (var type in assembly.GetTypes())
+{
+    if (type.IsClass)
     {
-        if (parametrs[i].Name == "DirectoryPath")
+        var displayname = type.GetCustomAttribute<DisplayNameAttribute>();
+        var version = type.GetCustomAttribute<VersionAttribute>();
+        if(displayname != null)
         {
-            arguments[i] = Directory.GetCurrentDirectory();
-        }
-        else if (parametrs[i].Name == "Mask")
-        {
-            arguments[i] = "*.*";
+            Console.WriteLine($"Класс: {type.Name} ({displayname.DisplayName})");
         }
         else
         {
-            arguments[i] = "";
+            Console.WriteLine($"Класс: {type.Name}");
         }
+        if (version != null)
+        {
+            Console.WriteLine($"Версия: {version.Major}.{version.Minor}");
+        }
+        var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        foreach (var method in methods.Where(m => !m.IsSpecialName))
+        {
+            var MethodDisplayName = method.GetCustomAttribute<DisplayNameAttribute>();
+            var parameters = method.GetParameters();
+            var ParametersList = string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}"));
+            if (MethodDisplayName != null)
+            {
+                Console.WriteLine($"Метод: {method.Name} ({ParametersList}) ({MethodDisplayName.DisplayName})");
+            }
+            else
+            {
+                Console.WriteLine($"Метод: {method.Name} ({ParametersList})");
+            }
+        }
+        var constructors = type.GetConstructors();
+        foreach (var constructor in constructors)
+        {
+            var parameters = constructor.GetParameters();
+            var ParametersList = string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}"));
+            Console.WriteLine($"Конструктор: {type.Name} ({ParametersList})");
+        }
+        Console.WriteLine();
     }
-    var command = (ICommand)Activator.CreateInstance(type, arguments);
-    command.Execute();
-    foreach(var property in type.GetProperties())
-    {
-        var value = property.GetValue(command);
-        Console.WriteLine($"{property.Name}: {value}");
-    }
-    Console.WriteLine();
 }
+
 

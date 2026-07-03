@@ -2,6 +2,8 @@ using CommandLib;
 
 namespace FileSystemCommands
 {
+    [DisplayName("Вычисление размера каталога")]
+    [Version(1, 0)]
     public class DirectorySizeCommand: ICommand
     {
         private readonly string _DirectoryPath;
