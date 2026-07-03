@@ -23,8 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\task08\task08.csproj" />
-    <ProjectReference Include="..\FileSystemCommands\FileSystemCommands.csproj" />
+    <ProjectReference Include="..\CommandLib\CommandLib.csproj" />
+    <ProjectReference Include="..\PluginA\PluginA.csproj" />
+    <ProjectReference Include="..\PluginB\PluginB.csproj" />
+    <ProjectReference Include="..\PluginC\PluginC.csproj" />
+    <ProjectReference Include="..\PluginRunner\PluginRunner.csproj" />
   </ItemGroup>
 
 </Project>
