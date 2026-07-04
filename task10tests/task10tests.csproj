@@ -27,7 +27,6 @@
     <ProjectReference Include="..\PluginA\PluginA.csproj" />
     <ProjectReference Include="..\PluginB\PluginB.csproj" />
     <ProjectReference Include="..\PluginC\PluginC.csproj" />
-    <ProjectReference Include="..\PluginRunner\PluginRunner.csproj" />
   </ItemGroup>
 
 </Project>

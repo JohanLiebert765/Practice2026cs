@@ -1,7 +1,6 @@
 using System.Reflection;
 using CommandLib;
 using Xunit;
-using PluginRunner;
 
 public class PluginTests
 {
@@ -53,8 +52,31 @@ public class PluginTests
         var indexA = sorted.IndexOf("PluginA");
         var indexB = sorted.IndexOf("PluginB");
         var indexC = sorted.IndexOf("PluginC");
-        Assert.True(indexB < indexA, "PluginB раньше чем PluginA");
-        Assert.True(indexB < indexC, "PluginB раньше чем PluginC");
+        Assert.True(indexB < indexA);
+        Assert.True(indexB < indexC);
+    }
+
+    [Fact]
+    public void LoadAndExecute_ShouldNoErrors()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), "PluginTest");
+        if (Directory.Exists(tempDir))
+        {
+            Directory.Delete(tempDir, true);
+        }
+        Directory.CreateDirectory(tempDir);
+        var BasePath = AppDomain.CurrentDomain.BaseDirectory;
+        File.Copy(Path.Combine(BasePath, "PluginA.dll"), Path.Combine(tempDir, "PluginA.dll"));
+        File.Copy(Path.Combine(BasePath, "PluginB.dll"), Path.Combine(tempDir, "PluginB.dll"));
+        File.Copy(Path.Combine(BasePath, "PluginC.dll"), Path.Combine(tempDir, "PluginC.dll"));
+        File.Copy(Path.Combine(BasePath, "CommandLib.dll"), Path.Combine(tempDir, "CommandLib.dll"));
+        var result = PluginLoader.LoadAndExecute(tempDir);
+        var indexB = result.IndexOf("PluginB");
+        var indexA = result.IndexOf("PluginA");
+        var indexC = result.IndexOf("PluginC");
+        Assert.True(indexB < indexA);
+        Assert.True(indexB < indexC);
+        Directory.Delete(tempDir, true);
     }
 }
 
