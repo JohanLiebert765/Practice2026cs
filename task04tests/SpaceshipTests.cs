@@ -2,7 +2,7 @@ using Xunit;
 using Moq;
 using task04;
 
-public class SpaceShipTests
+public class SpaceshipTests
 {
     [Fact]
     public void Cruiser_ShouldHaveCorrectStats()
