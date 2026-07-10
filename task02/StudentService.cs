@@ -22,8 +22,8 @@ namespace task02
             => _students
             .GroupBy(s => s.Faculty)
             .OrderByDescending(gr => gr.Average(s => s.Grades.Average()))
-            .First()
-            .Key;
+            .FirstOrDefault()
+            ?.Key;
     }
 }
 
