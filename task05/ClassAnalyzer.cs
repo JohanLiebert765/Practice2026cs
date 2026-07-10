@@ -8,6 +8,10 @@ public class ClassAnalyzer
 
     public ClassAnalyzer(Type type)
     {
+        if (type == null)
+        {
+            throw new ArgumentNullException(nameof(type));
+        }
         _type = type;
     }
     public IEnumerable<string> GetPublicMethods()
@@ -16,6 +20,10 @@ public class ClassAnalyzer
 
     public IEnumerable<string> GetMethodParams(string methodname)
     {
+        if (methodname == null)
+        {
+            throw new ArgumentNullException(nameof(methodname));
+        }
         var method = _type.GetMethod(methodname, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
         if (method == null)
         {
@@ -36,5 +44,4 @@ public class ClassAnalyzer
     public bool HasAttribute<T>() where T : Attribute
     => _type.IsDefined(typeof(T), false);
 }
-
 
