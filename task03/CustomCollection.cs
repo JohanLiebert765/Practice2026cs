@@ -29,7 +29,17 @@ namespace task03
         }
 
         public IEnumerable<T> FilterAndSort(Func<T, bool> predicate, Func<T, IComparable> keySelector)
-            => _items.Where(predicate).OrderBy(keySelector);
+        {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+            if(keySelector == null)
+            {
+                throw new ArgumentNullException(nameof(keySelector));
+            }
+            return _items.Where(predicate).OrderBy(keySelector);
+        }
     }
 }
 
