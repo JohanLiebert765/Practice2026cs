@@ -9,6 +9,7 @@ namespace CommandLib
             var loaded = new List<string>();
             while(loaded.Count < plugins.Count)
             {
+                var Count = loaded.Count;
                 foreach (var plugin in plugins)
                 {
                     if (loaded.Contains(plugin.Key))
@@ -22,6 +23,10 @@ namespace CommandLib
                         loaded.Add(plugin.Key);
                     }
                 }
+                if (loaded.Count == Count)
+                {
+                    throw new Exception("Найдена циклическа зависимость!");
+                }
             }
             return loaded;
         }
@@ -31,15 +36,23 @@ namespace CommandLib
             var PluginTypes = new Dictionary<string, Type>();
             foreach (var dllFile in dllFiles)
             {
-                var assembly = Assembly.LoadFrom(dllFile);
-                foreach (var type in assembly.GetTypes())
+                try
                 {
-                    var attribute = type.GetCustomAttribute<PluginLoadAttribute>();
-                    if (attribute != null && type.IsClass)
+                    var assembly = Assembly.LoadFrom(dllFile);
+                    foreach (var type in assembly.GetTypes())
                     {
-                        PluginTypes.Add(type.Name, type);
+                        var attribute = type.GetCustomAttribute<PluginLoadAttribute>();
+                        if (attribute != null && type.IsClass)
+                        {
+                            PluginTypes.Add(type.Name, type);
+                        }
                     }
                 }
+                catch (Exception exeption)
+                {
+                    throw new Exception($"Ошибка загрузки {Path.GetFileName(dllFile)}: {exeption.Message}");
+                }
+                
             }
             var plugindependencies = new Dictionary<string, string[]>();
             foreach (var plugin in PluginTypes)
@@ -51,7 +64,11 @@ namespace CommandLib
             foreach (var PluginName in loadOrder)
             {
                 var type = PluginTypes[PluginName];
-                var command = (ICommand)Activator.CreateInstance(type);
+                var command = Activator.CreateInstance(type) as ICommand;
+                if (command == null)
+                {
+                    throw new Exception($"Не удалось создать экземпляр {PluginName}");
+                }
                 command.Execute();
             }
             return loadOrder;
