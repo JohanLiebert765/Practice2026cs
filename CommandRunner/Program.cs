@@ -2,8 +2,16 @@
 using ICommand = CommandLib.ICommand;
 
 string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FileSystemCommands.dll");
-Assembly assembly = Assembly.LoadFrom(dllPath);
-
+Assembly assembly;
+try
+{
+    assembly = Assembly.LoadFrom(dllPath);
+}
+catch (Exception exception)
+{
+   Console.WriteLine($"Ошибка загрузки DLL: {exception.Message}");
+   return; 
+}
 var CommandTypes = assembly.GetTypes()
 .Where(type => type.GetInterfaces().Contains(typeof(ICommand)));
 
@@ -28,7 +36,12 @@ foreach (var type in CommandTypes)
             arguments[i] = "";
         }
     }
-    var command = (ICommand)Activator.CreateInstance(type, arguments);
+    var command = Activator.CreateInstance(type, arguments) as ICommand;
+    if (command == null)
+    {
+        Console.WriteLine($"Не удалось создать экземпляр {type.Name}");
+        continue;
+    }
     command.Execute();
     foreach(var property in type.GetProperties())
     {
