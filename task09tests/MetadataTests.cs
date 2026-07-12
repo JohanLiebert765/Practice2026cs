@@ -10,10 +10,11 @@ public class MetadataTests
     {
         var attribute = typeof(DirectorySizeCommand).GetCustomAttribute<DisplayNameAttribute>();
         Assert.NotNull(attribute);
+        Assert.Equal("Вычисление размера каталога", attribute.DisplayName);
     }
 
     [Fact]
-    public void DirrectorySizeCommand_ShouldHaveVersionAttribute()
+    public void DirectorySizeCommand_ShouldHaveVersionAttribute()
     {
         var attribute = typeof(DirectorySizeCommand).GetCustomAttribute<VersionAttribute>();
         Assert.NotNull(attribute);
@@ -26,10 +27,11 @@ public class MetadataTests
     {
          var attribute = typeof(FindFilesCommand).GetCustomAttribute<DisplayNameAttribute>();
          Assert.NotNull(attribute);
+         Assert.Equal("Поиск файлов по маске", attribute.DisplayName);
     }
 
     [Fact]
-    public void FindFilesCommand_ShouldVersionAttribute()
+    public void FindFilesCommand_ShouldHaveVersionAttribute()
     {
         var attribute = typeof(FindFilesCommand).GetCustomAttribute<VersionAttribute>();
         Assert.NotNull(attribute);
