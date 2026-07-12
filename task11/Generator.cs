@@ -23,7 +23,8 @@ namespace task11
             var result = compilation.Emit(dllPath);
             if (!result.Success)
             {
-                throw new Exception($"Ошибка!");
+                var errors = string.Join("\n", result.Diagnostics);
+                throw new Exception($"Ошибка компиляции:\n{errors}");
             }
             var assembly = Assembly.LoadFrom(dllPath);
             var type = assembly.GetTypes().First(type => typeof(ICalculator).IsAssignableFrom(type));
