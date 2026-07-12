@@ -6,7 +6,16 @@ if (args.Length == 0)
     Console.WriteLine("Укажите путь к DLL");
     return;
 }
-Assembly assembly = Assembly.LoadFrom(args[0]);
+Assembly assembly;
+try
+{
+    assembly = Assembly.LoadFrom(args[0]);
+}
+catch (Exception exception)
+{
+    Console.WriteLine($"Ошибка загрузки DLL: {exception.Message}");
+    return;
+}
 foreach (var type in assembly.GetTypes())
 {
     if (type.IsClass)
