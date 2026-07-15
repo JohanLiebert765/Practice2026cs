@@ -103,7 +103,7 @@ public class DefiniteIntegralTests
         plot.XLabel("Время (мс)");
         plot.YLabel("Количество потоков");
         plot.Title("Зависимость времени от количества потоков");
-        plot.SavePng("/home/n1k3/Practice2026cs/task14/chart.png", 800, 600);
+        plot.SavePng("chart.png", 800, 600);
         Console.WriteLine("График успешно сохранён!");
     }
 }
