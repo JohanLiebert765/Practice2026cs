@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Threading;
 
 public class DefiniteIntegral
 {
+
     public static double Solve(double a, double b, Func<double, double> function, double step, int threadsnumber)
     {
         if (function == null)
@@ -50,6 +52,17 @@ public class DefiniteIntegral
             thread.Start();
         }
         barrier.SignalAndWait();
+        return result;
+    }
+    public static double SolveSingleThread(double a, double b, Func<double, double> function, double step)
+    {
+        double result = 0.0;
+        double x = a;
+        while (x + step <= b)
+        {
+            result += (function(x) + function(x + step)) / 2.0 * step;
+            x += step;
+        }
         return result;
     }
 }
