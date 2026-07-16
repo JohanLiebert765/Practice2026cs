@@ -7,6 +7,8 @@ namespace task17
         private readonly BlockingCollection<ICommand> queueCommand = new();
         private readonly Thread thread;
         public Action<ICommand, Exception> ExceptionHandler { get; set; }
+        private readonly IScheduler scheduler = new Scheduler();
+        private readonly AutoResetEvent NewCommandEvent = new AutoResetEvent(false);
         public ServerThread()
         {
             thread = new Thread(ProcessCommands)
@@ -21,7 +23,12 @@ namespace task17
         }
         public void QueueCommand(ICommand command)
         {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
             queueCommand.Add(command);
+            NewCommandEvent.Set();
         }
         private volatile bool hardStop = false;
         private volatile bool softStop = false;
@@ -33,20 +40,39 @@ namespace task17
                 {
                     break;
                 }
-                if (softStop && queueCommand.Count == 0)
+                while (queueCommand.TryTake(out var command))
                 {
-                    break;
+                    scheduler.Add(command);
                 }
-                ICommand command = queueCommand.Take();
-                try
+                if (scheduler.HasCommand())
                 {
-                    command.Execute();
-                }
-                catch (Exception exception)
-                {
-                    if (ExceptionHandler != null)
+                    var command = scheduler.Select();
+                    try
                     {
-                        ExceptionHandler(command, exception);
+                        command.Execute();
+                    }
+                    catch (Exception exception)
+                    {
+                        if(ExceptionHandler != null)
+                        {
+                            ExceptionHandler(command, exception);
+                        }
+                    }
+                }
+                else
+                {
+                    if (softStop)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        NewCommandEvent.Reset();
+                        if (queueCommand.Count > 0)
+                        {
+                            continue;
+                        }
+                        NewCommandEvent.WaitOne();
                     }
                 }
             }
@@ -54,10 +80,12 @@ namespace task17
         public void HardStop()
         {
             hardStop = true;
+            NewCommandEvent.Set();
         }
         public void SoftStop()
         {
             softStop = true;
+            NewCommandEvent.Set();
         }
     }
 }
