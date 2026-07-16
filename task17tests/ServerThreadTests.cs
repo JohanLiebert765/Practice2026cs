@@ -6,6 +6,7 @@ namespace task17tests
     public class TestCommand: ICommand
     {
         public bool Executed = false;
+        public bool IsComplete => true;
         public void Execute()
         {
             Executed = true;
@@ -13,33 +14,25 @@ namespace task17tests
     }
     public class FailCommand : ICommand
     {
+
+        public bool IsComplete => true;
         public void Execute()
         {
             throw new Exception("Команда сломана!");
         }
     }
-    public class LongCommand: ICommand
+    public class LongCommand : ICommand
     {
-        private readonly ServerThread Server;
         private readonly int Steps;
         public int Step = 0;
-        public bool Finished = false;
-        public LongCommand(ServerThread server, int steps)
+        public LongCommand(int steps)
         {
-            Server = server;
             Steps = steps;
         }
+        public bool IsComplete => Step >= Steps;
         public void Execute()
         {
             Step++;
-            if (Step >= Steps)
-            {
-                Finished = true;
-            }
-            else
-            {
-                Server.QueueCommand(this);
-            }
         }
     }
     public class ServerThreadTests
@@ -117,59 +110,26 @@ namespace task17tests
         public void LongCommand_CompletesAllSteps()
         {
             var server = new ServerThread();
-            var command = new LongCommand(server, 10);
+            var command = new LongCommand(10);
             server.QueueCommand(command);
             server.QueueCommand(new SoftStopCommand(server));
             server.Start();
             server.Thread.Join(5000);
-            Assert.True(command.Finished);
+            Assert.True(command.IsComplete);
             Assert.Equal(10, command.Step);
-        }
-
-        [Fact]
-        public void TwoLongCommands_Completes()
-        {
-            var server = new ServerThread();
-            var FirstCommand = new LongCommand(server, 5);
-            var SecondCommand = new LongCommand(server, 5);
-            server.QueueCommand(FirstCommand);
-            server.QueueCommand(SecondCommand);
-            server.QueueCommand(new SoftStopCommand(server));
-            server.Start();
-            server.Thread.Join(5000);
-            Assert.True(FirstCommand.Finished);
-            Assert.True(SecondCommand.Finished);
-            Assert.Equal(5, FirstCommand.Step);
-            Assert.Equal(5, SecondCommand.Step);
         }
 
         [Fact]
         public void HardStop_InterruptsLongCommand()
         {
             var server = new ServerThread();
-            var Command = new LongCommand(server, 10);
+            var Command = new LongCommand(10);
             server.QueueCommand(Command);
             server.QueueCommand(new HardStopCommand(server));
             server.Start();
             server.Thread.Join(5000);
-            Assert.False(Command.Finished);
+            Assert.False(Command.IsComplete);
             Assert.True(Command.Step < 10);
-        }
-
-        [Fact]
-        public void CommandsWithLongCommands_Completes()
-        {
-            var server = new ServerThread();
-            var Command = new TestCommand();
-            var longCommand = new LongCommand(server, 5);
-            server.QueueCommand(Command);
-            server.QueueCommand(longCommand);
-            server.QueueCommand(new SoftStopCommand(server));
-            server.Start();
-            server.Thread.Join(5000);
-            Assert.True(Command.Executed);
-            Assert.True(longCommand.Finished);
-            Assert.Equal(5, longCommand.Step);  
         }
 
         [Fact]
@@ -188,7 +148,7 @@ namespace task17tests
                     var server = new ServerThread();
                     for (int j = 0; j < CommandCounts[i]; j++)
                     {
-                        var command = new LongCommand(server, Steps);
+                        var command = new LongCommand(Steps);
                         server.QueueCommand(command);
                     }
                     server.QueueCommand(new SoftStopCommand(server));

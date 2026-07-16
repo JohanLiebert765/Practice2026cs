@@ -58,6 +58,10 @@ namespace task17
                             ExceptionHandler(command, exception);
                         }
                     }
+                    if (command.IsComplete)
+                    {
+                        scheduler.Remove(command);
+                    }
                 }
                 else
                 {

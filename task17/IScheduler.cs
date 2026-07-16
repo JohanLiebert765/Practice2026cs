@@ -5,6 +5,7 @@ namespace task17
         bool HasCommand();
         ICommand Select();
         void Add(ICommand cmd);
+        void Remove(ICommand cmd);
     }
 }
 

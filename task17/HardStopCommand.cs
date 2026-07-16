@@ -7,6 +7,7 @@ namespace task17
         {
             _server = server;
         }
+        public bool IsComplete => true;
         public void Execute()
         {
             if (Thread.CurrentThread != _server.Thread)

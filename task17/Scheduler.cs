@@ -27,12 +27,20 @@ namespace task17
                 index = 0;
             }
             var command = commands[index];
-            commands.RemoveAt(index);
-            if (commands.Count > 0 && index >= commands.Count)
-            {
-                index = 0;
-            }
+            index++;
             return command;
+        }
+        public void Remove(ICommand cmd)
+        {
+           int position = commands.IndexOf(cmd);
+            if (position >= 0)
+            {
+                commands.RemoveAt(position);
+                if (position < index)
+                {
+                    index--;
+                }
+            } 
         }
     }
 }
